@@ -27,7 +27,7 @@
     var b=f.querySelector('button'); b.disabled=true;
     sb.from('partner_applications').insert({name:g('name'),email:g('email'),telegram:g('telegram')||null,topic:g('topic'),description:g('description')||null,consent:true}).then(function(r){
       b.disabled=false;
-      if(r.error) say('Не удалось отправить. Напишите нам на почту или в Telegram.','Could not send. Contact us by email or Telegram.',1);
+      if(r.error) say('Не удалось отправить ('+(r.error.code||r.error.message)+'). Напишите нам на почту или в Telegram.','Could not send ('+(r.error.code||r.error.message)+'). Contact us by email or Telegram.',1);
       else {f.reset(); say('Заявка отправлена. Мы свяжемся с вами.','Request sent. We will contact you.');}
     });
   });
