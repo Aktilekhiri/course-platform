@@ -100,3 +100,5 @@ img.logo{background:none;border-radius:0;width:38px;height:38px;object-fit:conta
 .who{min-width:0;max-width:44vw;flex-shrink:1}.who .wn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:640px){.who .wn{display:none}.who{padding:10px}}
 
 [hidden]{display:none!important}
+
+.hero .art{min-height:0;display:flex;justify-content:center;align-items:flex-start}.art .girl{display:block;width:min(100%,380px);height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:28px;border:1px solid var(--line-hi);box-shadow:0 30px 80px -30px var(--glow);pointer-events:none}.art .g-l{display:none}[data-theme=light] .art .g-l{display:block}[data-theme=light] .art .g-d{display:none}.hero .art .prompt{left:0;bottom:-18px}.hero .art .tag3{right:0}
