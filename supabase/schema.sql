@@ -85,7 +85,7 @@ create table public.certificates (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
   course_id uuid not null references public.courses(id) on delete cascade,
-  code text not null unique default encode(gen_random_bytes(6),'hex'),
+  code text not null unique default substr(replace(gen_random_uuid()::text,'-',''),1,12),
   status text not null default 'pending' check (status in ('pending','approved','revoked')),
   issued_at timestamptz,
   unique (user_id, course_id)
