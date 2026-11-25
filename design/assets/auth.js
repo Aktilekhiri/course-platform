@@ -25,12 +25,12 @@
   function face(box,url,txt){ if(!box) return; box.textContent=''; if(url){var i=new Image(); i.alt=''; i.referrerPolicy='no-referrer'; i.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block'; i.onerror=function(){box.textContent=txt}; i.src=url; box.appendChild(i)} else box.textContent=txt }
   sb.auth.getSession().then(function(r){
     var ss=r.data.session, who=document.getElementById('who'), pn=document.getElementById('pn');
-    if(!ss){ if(pn||document.getElementById('adm')) location.replace('login.html'); return }
+    if(!ss){ if(pn||document.querySelector('[data-auth]')) location.replace('login.html'); return }
     var u=ss.user, md=u.user_metadata||{}, nm=md.full_name||md.name||(u.email||'').split('@')[0], ini=nm.charAt(0).toUpperCase();
     if(who){who.href='profile.html';who.querySelector('.wn').textContent=nm.split(' ')[0]}
     sb.from('profiles').select('role,avatar_url').eq('id',u.id).maybeSingle().then(function(x){
       var role=(x.data&&x.data.role)||'student', av=(x.data&&x.data.avatar_url)||md.avatar_url||md.picture||null, t=ROLE[role];
-      document.querySelectorAll('.adm').forEach(function(a){a.hidden=role!=='admin'});
+      document.querySelectorAll('.adm').forEach(function(a){a.hidden=role!=='admin'}); document.querySelectorAll('.ins').forEach(function(a){a.hidden=!(role==='admin'||role==='instructor')});
       if(who&&av){var ic=who.querySelector('svg'); if(ic){var s=document.createElement('span'); s.style.cssText='width:22px;height:22px;border-radius:50%;overflow:hidden;display:inline-block;flex:none'; ic.replaceWith(s); face(s,av,'')}}
       if(pn){
         pn.textContent=nm; document.getElementById('pe').textContent=u.email||''; face(document.getElementById('pa'),av,ini);

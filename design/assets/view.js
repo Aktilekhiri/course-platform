@@ -1,0 +1,56 @@
+// Public views: catalog, course page, lesson page. Text is rendered as plain text only.
+(function(){
+  var NG=window.NG; if(!NG) return; var sb=NG.sb, q=new URLSearchParams(location.search);
+  var en=function(){return document.documentElement.lang==='en'}, tr=function(a,b){return en()?b:a};
+  var $=function(id){return document.getElementById(id)};
+  var el=function(t,c,x){var e=document.createElement(t); if(c) e.className=c; if(x!=null) e.textContent=x; return e};
+  var pick=function(r,k){var a=r[k+'_ru'],b=r[k+'_en']; return en()?(b||a||''):(a||b||'')};
+  var yt=function(u){var m=/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/.exec(u||''); return m&&m[1]};
+  function paras(box,text){box.textContent=''; (text||'').split(/\n{2,}/).forEach(function(p){if(p.trim()){var e=el('p',null,p.trim()); e.style.whiteSpace='pre-line'; box.appendChild(e)}})}
+  var again=[]; document.addEventListener('click',function(e){if(e.target.closest('[data-act=lang]')) setTimeout(function(){again.forEach(function(f){f()})},0)});
+  function fail(box,ru,e){box.textContent=''; box.appendChild(el('p','muted',tr(ru,e)))}
+
+  if($('dyn')) sb.from('courses').select('slug,title_ru,title_en,description_ru,description_en').eq('status','published').order('created_at',{ascending:false}).then(function(r){
+    var d=r.data||[], box=$('dyn');
+    function draw(){box.textContent=''; d.forEach(function(c){
+      var a=el('a','glass pad hov'); a.href='c.html?c='+encodeURIComponent(c.slug); a.style.cssText='text-decoration:none;display:grid;gap:10px';
+      a.appendChild(el('h3',null,pick(c,'title'))).style.margin='0'; a.appendChild(el('p','muted',pick(c,'description'))).style.margin='0'; box.appendChild(a)})}
+    draw(); again.push(draw);
+  });
+
+  if($('cv')) sb.from('courses').select('id,title_ru,title_en,description_ru,description_en,modules(id,position,title_ru,title_en)').eq('slug',q.get('c')||'').eq('status','published').maybeSingle().then(function(r){
+    var c=r.data, box=$('cv'); if(!c){fail(box,'Курс не найден.','Course not found.');return}
+    var ms=(c.modules||[]).sort(function(a,b){return a.position-b.position});
+    function draw(){box.textContent='';
+      box.appendChild(el('h1',null,pick(c,'title'))).style.cssText='font-size:clamp(24px,4vw,36px);margin:0';
+      box.appendChild(el('p','muted',pick(c,'description')));
+      var l=el('div','list'); ms.forEach(function(m,i){var a=el('a','row'); a.href='l.html?m='+m.id; a.style.textDecoration='none'; var g=el('div','grow'); g.appendChild(el('b',null,(i+1)+'. '+pick(m,'title'))); a.appendChild(g); l.appendChild(a)});
+      box.appendChild(l);
+      if(ms.length){var b=el('a','btn',tr('Начать','Start')); b.href='l.html?m='+ms[0].id; b.style.marginTop='16px'; b.addEventListener('click',function(){
+        NG.onUser(function(u){sb.from('enrollments').upsert({user_id:u.id,course_id:c.id},{ignoreDuplicates:true})}) }); box.appendChild(b)}
+      else box.appendChild(el('p','muted',tr('Модули скоро появятся.','Modules are coming soon.')));
+    }
+    draw(); again.push(draw);
+  });
+
+  if($('lv')) sb.from('modules').select('*,courses(slug,title_ru,title_en,status)').eq('id',q.get('m')||'').maybeSingle().then(function(r){
+    var m=r.data, box=$('lv'); if(!m){fail(box,'Урок не найден.','Lesson not found.');return}
+    sb.from('modules').select('id,position').eq('course_id',m.course_id).order('position').then(function(s){
+      var ids=(s.data||[]).map(function(x){return x.id}), i=ids.indexOf(m.id);
+      function draw(){box.textContent='';
+        var back=el('a','muted','← '+pick(m.courses,'title')); back.href='c.html?c='+encodeURIComponent(m.courses.slug); box.appendChild(back);
+        box.appendChild(el('h1',null,pick(m,'title'))).style.cssText='font-size:clamp(22px,3.6vw,32px);margin:8px 0 0';
+        var id=yt(m.video_url);
+        if(id){var w=el('div'); w.style.cssText='position:relative;aspect-ratio:16/9;margin:16px 0;border-radius:18px;overflow:hidden';
+          var f=el('iframe'); f.src='https://www.youtube-nocookie.com/embed/'+id; f.title=pick(m,'title'); f.allow='accelerometer; encrypted-media; picture-in-picture'; f.allowFullscreen=true; f.referrerPolicy='strict-origin-when-cross-origin'; f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0'; w.appendChild(f); box.appendChild(w)}
+        [['theory','Теория','Theory'],['practice','Практика','Practice'],['homework','Домашнее задание','Homework']].forEach(function(k){
+          var t=pick(m,k[0]); if(!t) return; var sec=el('section','glass pad'); sec.style.marginTop='16px'; sec.appendChild(el('h3',null,tr(k[1],k[2]))); var b=el('div'); paras(b,t); sec.appendChild(b); box.appendChild(sec)});
+        var nav=el('div','btns'); nav.style.marginTop='16px';
+        if(i>0){var p=el('a','btn ghost',tr('Назад','Back')); p.href='l.html?m='+ids[i-1]; nav.appendChild(p)}
+        if(i>=0&&i<ids.length-1){var n=el('a','btn',tr('Дальше','Next')); n.href='l.html?m='+ids[i+1]; nav.appendChild(n)}
+        box.appendChild(nav);
+      }
+      draw(); again.push(draw);
+    });
+  });
+})();

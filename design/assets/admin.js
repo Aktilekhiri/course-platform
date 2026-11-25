@@ -25,6 +25,20 @@
       });
     });
   }
+  function courses(){
+    var box=$('crs'); box.textContent='';
+    sb.from('courses').select('id,title_ru,title_en,status,owner:profiles(full_name,email)').order('created_at',{ascending:false}).then(function(r){
+      if(r.error){note(tr('Не удалось загрузить курсы.','Could not load courses.'),1);return}
+      if(!r.data.length){box.appendChild(el('p','muted',tr('Курсов пока нет.','No courses yet.')));return}
+      var CS={draft:['Черновик','Draft'],pending:['На проверке','In review'],published:['Опубликован','Published']};
+      r.data.forEach(function(c){
+        var row=el('div','row'), g=el('div','grow'), o=c.owner||{};
+        var a=el('a',null,(en()?c.title_en||c.title_ru:c.title_ru||c.title_en)||'—'); a.href='edit.html?id='+c.id; g.appendChild(el('b')).appendChild(a); g.appendChild(el('small',null,o.full_name||o.email||'')); row.appendChild(g);
+        row.appendChild(sel(CS,c.status,function(s){sb.from('courses').update({status:s.value}).eq('id',c.id).then(function(x){note(x.error?tr('Не удалось сохранить.','Could not save.'):tr('Сохранено.','Saved.'),!!x.error)})}));
+        box.appendChild(row);
+      });
+    });
+  }
   function users(me){
     var box=$('users'); box.textContent='';
     sb.from('profiles').select('id,email,full_name,role').order('created_at',{ascending:false}).then(function(r){
@@ -39,6 +53,6 @@
   }
   window.NG.onUser(function(u,role){
     if(role!=='admin'){location.replace('profile.html');return}
-    $('adm').hidden=false; apps(); users(u.id);
+    $('adm').hidden=false; apps(); courses(); users(u.id);
   });
 })();
