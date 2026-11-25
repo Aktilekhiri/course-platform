@@ -1,0 +1,66 @@
+-- Курс «Website with AI»: 10 модулей. Запустить один раз в Supabase → SQL Editor.
+-- Владелец курса = админ (kazievaktilek41@gmail.com). Видео добавляются позже через редактор курса.
+with c as (
+  insert into public.courses (slug,owner_id,title_ru,title_en,description_ru,description_en,category,language,status)
+  select 'website-with-ai', id, 'Website with AI', 'Website with AI',
+    'Создайте лендинг, магазин и учебный сайт вместе с ИИ и опубликуйте свой сайт.',
+    'Build a landing page, a store and a learning site with AI and publish your own site.',
+    'web','ru','published'
+  from public.profiles where email='kazievaktilek41@gmail.com'
+  on conflict (slug) do update set status='published'
+  returning id
+)
+insert into public.modules (course_id,position,title_ru,title_en,theory_ru,theory_en,video_url,practice_ru,practice_en,homework_ru,homework_en)
+select c.id, v.* from c, (values
+(1,$q$Что такое сайт и как с ним работает ИИ$q$,$q$What a website is and how AI helps$q$,$q$Сайт — это набор файлов (HTML, CSS, JavaScript), которые браузер превращает в страницу. HTML — структура, CSS — оформление, JavaScript — поведение. ИИ не заменяет понимание, а быстро пишет черновик: вы объясняете задачу, он предлагает код, вы проверяете и правите.
+
+В курсе вы пройдёте путь от идеи до опубликованного сайта: лендинг, магазин, учебный сайт, публикация, домен и юридический минимум.$q$,$q$A website is a set of files (HTML, CSS, JavaScript) that a browser turns into a page. HTML is structure, CSS is looks, JavaScript is behaviour. AI does not replace understanding; it drafts quickly: you describe the task, it proposes code, you check and fix it.
+
+In this course you go from an idea to a published site: a landing page, a store, a learning site, publishing, a domain and the legal basics.$q$,null::text,$q$Откройте любой сайт, нажмите правой кнопкой → «Просмотреть код» и найдите заголовок страницы в HTML.$q$,$q$Open any website, right-click → “View source” and find the page heading in the HTML.$q$,$q$Напишите 3–4 предложения: какой сайт вы хотите сделать за курс и для кого он.$q$,$q$Write 3–4 sentences: which website you want to build during the course and who it is for.$q$),
+(2,$q$План сайта и хороший запрос к ИИ$q$,$q$Site plan and a good AI prompt$q$,$q$Плохой запрос: «сделай сайт». Хороший запрос содержит: кто аудитория, цель сайта, разделы, стиль, язык, ограничения. Сначала просите план страниц и блоков, потом код по одному блоку.
+
+Шаблон: «Ты веб-разработчик. Сайт для [кто], цель [что], разделы [список], стиль [описание]. Дай структуру, потом код первого блока на чистом HTML и CSS».$q$,$q$A bad prompt: “make a website”. A good prompt states the audience, goal, sections, style, language and constraints. First ask for a page and block plan, then code one block at a time.
+
+Template: “You are a web developer. A site for [who], goal [what], sections [list], style [description]. Give the structure, then the code of the first block in plain HTML and CSS.”$q$,null::text,$q$Составьте запрос по шаблону для вашего сайта и получите от ИИ план разделов.$q$,$q$Write a prompt using the template for your site and get a section plan from the AI.$q$,$q$Отправьте текст вашего запроса и план, который предложил ИИ, с вашими правками (что убрали или добавили и почему).$q$,$q$Submit your prompt and the plan the AI proposed, with your edits (what you removed or added, and why).$q$),
+(3,$q$Лендинг: первый экран и структура$q$,$q$Landing page: first screen and structure$q$,$q$Лендинг — одна страница с одной целью. Первый экран отвечает на три вопроса: что это, для кого, что делать дальше. Типовая структура: первый экран, выгоды, как это работает, отзывы или примеры, вопросы, призыв к действию.
+
+Просите ИИ делать по одному блоку и сразу проверяйте результат в браузере.$q$,$q$A landing page is one page with one goal. The first screen answers three questions: what it is, who it is for, what to do next. A typical structure: first screen, benefits, how it works, reviews or examples, FAQ, call to action.
+
+Ask the AI to build one block at a time and check the result in the browser straight away.$q$,null::text,$q$Соберите лендинг из 4 блоков: первый экран, выгоды, как это работает, призыв к действию. Сохраните как index.html.$q$,$q$Build a landing page with 4 blocks: first screen, benefits, how it works, call to action. Save it as index.html.$q$,$q$Отправьте файл index.html или скриншот лендинга. Кнопка призыва к действию должна быть видна без прокрутки.$q$,$q$Submit the index.html file or a screenshot of the landing page. The call-to-action button must be visible without scrolling.$q$),
+(4,$q$Дизайн и адаптив: сайт на телефоне$q$,$q$Design and responsive layout: the site on a phone$q$,$q$Большинство посетителей придут с телефона. Адаптивность — сайт удобен на любой ширине экрана. Основы: мета-тег viewport, гибкая сетка (flex или grid), относительные размеры, читаемый шрифт от 16px, крупные кнопки.
+
+Для единого вида задайте палитру из 3–4 цветов и один-два шрифта и просите ИИ использовать только их.$q$,$q$Most visitors will come from a phone. Responsive means the site is comfortable at any screen width. Basics: the viewport meta tag, a flexible layout (flex or grid), relative sizes, a readable font from 16px, large buttons.
+
+For a consistent look, set a palette of 3–4 colours and one or two fonts, and ask the AI to use only those.$q$,null::text,$q$Проверьте лендинг при ширине 390px (режим телефона в браузере). Исправьте всё, что вылезает за экран.$q$,$q$Check your landing page at 390px width (phone mode in the browser). Fix anything that overflows the screen.$q$,$q$Отправьте два скриншота: компьютер и телефон. Напишите, что исправили.$q$,$q$Submit two screenshots: desktop and phone. Write what you fixed.$q$),
+(5,$q$Интернет-магазин: каталог и корзина$q$,$q$Online store: catalog and cart$q$,$q$Минимальный магазин: список товаров (фото, название, цена), страница товара, корзина, форма заказа. Для старта достаточно каталога из 6–8 товаров и корзины на JavaScript, которая хранит выбор в браузере.
+
+Оплату на этом этапе не подключаем: заказ уходит сообщением владельцу (например, в Telegram). Не храните и не просите у посетителей данные банковских карт на своём сайте.$q$,$q$A minimal store: a product list (photo, name, price), a product page, a cart, an order form. To start, a catalog of 6–8 products and a JavaScript cart that keeps the choice in the browser is enough.
+
+We do not connect payments at this stage: the order goes to the owner as a message (for example, in Telegram). Never store or ask visitors for bank card data on your own site.$q$,null::text,$q$Сделайте каталог из 6 товаров и корзину с подсчётом суммы.$q$,$q$Build a catalog of 6 products and a cart that totals the price.$q$,$q$Отправьте ссылку или файлы магазина. Корзина должна считать итог при добавлении и удалении товара.$q$,$q$Submit a link or the files of the store. The cart must recalculate the total when items are added and removed.$q$),
+(6,$q$Учебный сайт: уроки и прогресс$q$,$q$Learning site: lessons and progress$q$,$q$Учебный сайт — это каталог курсов, страница урока с видео и текстом, задание и отметка о прохождении. Данные уроков удобно хранить отдельно от вёрстки (список в JSON или в базе данных), чтобы добавлять уроки без правки кода.
+
+Просите ИИ вынести данные в отдельную структуру и показать на странице списком.$q$,$q$A learning site is a course catalog, a lesson page with video and text, a task and a completion mark. It is convenient to keep lesson data separate from the layout (a JSON list or a database) so you can add lessons without editing code.
+
+Ask the AI to move the data into a separate structure and render it as a list on the page.$q$,null::text,$q$Сделайте страницу курса со списком из 3 уроков и страницу одного урока.$q$,$q$Build a course page with a list of 3 lessons and one lesson page.$q$,$q$Отправьте ссылку на страницу курса и урока. Урок должен открываться по клику из списка.$q$,$q$Submit a link to the course page and a lesson. The lesson must open from the list on click.$q$),
+(7,$q$Публикация: ваш сайт в интернете$q$,$q$Publishing: your site online$q$,$q$Статический сайт можно бесплатно опубликовать на GitHub Pages, Cloudflare Pages или Netlify. Путь на GitHub Pages: создать аккаунт и репозиторий, загрузить файлы, в Settings → Pages выбрать ветку main и корневую папку, подождать 1–2 минуты и открыть адрес вида имя.github.io/репозиторий.
+
+После каждого изменения файлов сайт обновляется сам.$q$,$q$A static site can be published for free on GitHub Pages, Cloudflare Pages or Netlify. The GitHub Pages path: create an account and a repository, upload the files, in Settings → Pages choose the main branch and the root folder, wait 1–2 minutes and open an address like name.github.io/repository.
+
+After each file change the site updates by itself.$q$,null::text,$q$Опубликуйте лендинг из модуля 3 и откройте его по ссылке с телефона.$q$,$q$Publish the landing page from module 3 and open it by link on your phone.$q$,$q$Отправьте рабочую ссылку на опубликованный сайт.$q$,$q$Submit a working link to the published site.$q$),
+(8,$q$Домен и DNS$q$,$q$Domain and DNS$q$,$q$Домен — это адрес сайта (например, example.com). DNS — «телефонная книга», которая связывает домен с сервером. Чтобы подключить домен к сайту, в настройках регистратора добавляют DNS-записи (A, CNAME), которые указывает хостинг, и ждут обновления от нескольких минут до суток.
+
+Домен платный и продлевается раз в год. Для учебного проекта достаточно бесплатного адреса из модуля 7.$q$,$q$A domain is the address of a site (for example, example.com). DNS is the “phone book” that links the domain to a server. To connect a domain, you add DNS records (A, CNAME) given by your hosting in the registrar settings and wait from a few minutes to a day for the update.
+
+A domain is paid and renewed yearly. For a learning project the free address from module 7 is enough.$q$,null::text,$q$Найдите, какие DNS-записи нужны для вашего хостинга (инструкция хостинга) и выпишите их.$q$,$q$Find which DNS records your hosting needs (see its documentation) and write them down.$q$,$q$Отправьте список записей (тип, имя, значение) или ссылку на сайт с подключённым доменом.$q$,$q$Submit the list of records (type, name, value) or a link to a site with a connected domain.$q$),
+(9,$q$Юридический минимум сайта$q$,$q$Legal basics for a site$q$,$q$Если сайт собирает данные (формы, регистрация, почта), нужны: политика конфиденциальности (какие данные, зачем, как долго, как удалить), согласие пользователя до отправки данных, контакты владельца и условия использования. Если пользователь передаёт данные в сторонние сервисы (аналитика, шрифты, карты), это тоже указывается.
+
+Требования зависят от страны. Это общий ориентир, а не юридическая консультация: уточняйте нормы вашей страны.$q$,$q$If a site collects data (forms, sign-up, email), you need: a privacy policy (what data, why, for how long, how to delete it), user consent before the data is sent, the owner's contacts and terms of use. If data goes to third-party services (analytics, fonts, maps), that is stated too.
+
+Requirements depend on the country. This is a general guide, not legal advice: check the rules of your country.$q$,null::text,$q$Добавьте на сайт страницу политики конфиденциальности и ссылку на неё в подвале. Если есть форма — галочку согласия.$q$,$q$Add a privacy policy page to your site and a link to it in the footer. If there is a form, add a consent checkbox.$q$,$q$Отправьте ссылку на страницу политики и скриншот формы с согласием (или напишите, что форм нет).$q$,$q$Submit a link to the policy page and a screenshot of the form with consent (or state that there are no forms).$q$),
+(10,$q$Итоговый проект и проверка$q$,$q$Final project and review$q$,$q$Итог: опубликованный сайт, который открывается на компьютере и телефоне, имеет понятный первый экран, рабочие кнопки и ссылки, страницу политики конфиденциальности и контакты. Перед сдачей пройдите чек-лист: ссылки открываются, текст без ошибок, изображения загружаются, нет горизонтальной прокрутки на телефоне, нет чужих материалов без разрешения.
+
+Сертификат NextGen выдаётся после проверки работы. Он не является государственным документом об образовании.$q$,$q$The result: a published site that works on desktop and phone, has a clear first screen, working buttons and links, a privacy policy page and contacts. Before submitting, go through the checklist: links open, text has no errors, images load, no horizontal scroll on a phone, no third-party materials without permission.
+
+A NextGen certificate is issued after your work is reviewed. It is not an official state document of education.$q$,null::text,$q$Пройдите чек-лист на своём сайте и исправьте найденное.$q$,$q$Go through the checklist on your site and fix what you find.$q$,$q$Отправьте ссылку на итоговый сайт и 2–3 предложения о том, что вы сделали с помощью ИИ, а что исправляли сами.$q$,$q$Submit a link to the final site and 2–3 sentences on what you did with AI and what you fixed yourself.$q$)
+) as v(position,title_ru,title_en,theory_ru,theory_en,video_url,practice_ru,practice_en,homework_ru,homework_en)
+on conflict (course_id,position) do nothing;
