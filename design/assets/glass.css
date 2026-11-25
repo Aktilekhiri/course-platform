@@ -98,3 +98,5 @@ img.logo{background:none;border-radius:0;width:38px;height:38px;object-fit:conta
 .badge{white-space:normal}main p{overflow-wrap:anywhere}
 
 .who{min-width:0;max-width:44vw;flex-shrink:1}.who .wn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}@media(max-width:640px){.who .wn{display:none}.who{padding:10px}}
+
+[hidden]{display:none!important}
