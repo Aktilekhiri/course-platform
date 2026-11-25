@@ -19,6 +19,21 @@
       });
     }
   });
+
+  var ROLE={student:['Студент','Student'],instructor:['Преподаватель','Instructor'],admin:['Администратор','Admin']};
+  sb.auth.getSession().then(function(r){
+    var ss=r.data.session, who=document.getElementById('who'), pn=document.getElementById('pn');
+    if(!ss){ if(pn) location.replace('login.html'); return }
+    var u=ss.user, nm=(u.user_metadata&&(u.user_metadata.full_name||u.user_metadata.name))||(u.email||'').split('@')[0];
+    if(who){who.href='profile.html';who.querySelector('.wn').textContent=nm.split(' ')[0]}
+    if(pn){
+      pn.textContent=nm; document.getElementById('pe').textContent=u.email||''; document.getElementById('pa').textContent=nm.charAt(0).toUpperCase();
+      sb.from('profiles').select('role').eq('id',u.id).maybeSingle().then(function(x){
+        var b=document.getElementById('pr'), t=x.data&&ROLE[x.data.role]; if(b&&t){b.textContent=t[en()?1:0]}
+      });
+    }
+  });
+  document.addEventListener('click',function(e){ if(e.target.closest('[data-act=out]')) sb.auth.signOut().then(function(){location.href='index.html'}) });
   var f=document.getElementById('pf');
   if(f) f.addEventListener('submit',function(e){
     e.preventDefault();
