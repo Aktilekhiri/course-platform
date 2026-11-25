@@ -33,23 +33,31 @@
     draw(); again.push(draw);
   });
 
-  if($('lv')) sb.from('modules').select('*,courses(slug,title_ru,title_en,status)').eq('id',q.get('m')||'').maybeSingle().then(function(r){
+  if($('lv')) sb.from('modules').select('*,courses(slug,title_ru,title_en,status,owner_id)').eq('id',q.get('m')||'').maybeSingle().then(function(r){
     var m=r.data, box=$('lv'); if(!m){fail(box,'Урок не найден.','Lesson not found.');return}
     sb.from('modules').select('id,position').eq('course_id',m.course_id).order('position').then(function(s){
       var ids=(s.data||[]).map(function(x){return x.id}), i=ids.indexOf(m.id);
+      var st={u:null,role:null,acc:{}};
+      function bypass(){return st.role==='admin'||(st.u&&m.courses.owner_id===st.u.id)}
       function draw(){box.textContent='';
         var back=el('a','muted','← '+pick(m.courses,'title')); back.href='c.html?c='+encodeURIComponent(m.courses.slug); box.appendChild(back);
         box.appendChild(el('h1',null,pick(m,'title'))).style.cssText='font-size:clamp(22px,3.6vw,32px);margin:8px 0 0';
+        if(i>0&&!bypass()&&!st.acc[ids[i-1]]){var lk=el('section','glass pad'); lk.style.marginTop='16px'; lk.appendChild(el('p',null,tr('Этот модуль откроется после принятой практики предыдущего.','This module opens after your practice in the previous one is accepted.')));
+          var pb=el('a','btn',tr('К предыдущему модулю','To the previous module')); pb.href='l.html?m='+ids[i-1]; lk.appendChild(pb); box.appendChild(lk); return}
         var id=yt(m.video_url);
         if(id){var w=el('div'); w.style.cssText='position:relative;aspect-ratio:16/9;margin:16px 0;border-radius:18px;overflow:hidden';
           var f=el('iframe'); f.src='https://www.youtube-nocookie.com/embed/'+id; f.title=pick(m,'title'); f.allow='accelerometer; encrypted-media; picture-in-picture'; f.allowFullscreen=true; f.referrerPolicy='strict-origin-when-cross-origin'; f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0'; w.appendChild(f); box.appendChild(w)}
         [['theory','Теория','Theory'],['practice','Практика','Practice'],['homework','Домашнее задание','Homework']].forEach(function(k){
           var t=pick(m,k[0]); if(!t) return; var sec=el('section','glass pad'); sec.style.marginTop='16px'; sec.appendChild(el('h3',null,tr(k[1],k[2]))); var b=el('div'); paras(b,t); sec.appendChild(b); box.appendChild(sec)});
+        box.appendChild(NG.practice?NG.practice(m,st.u,function(ok){if(ok&&!st.acc[m.id]){st.acc[m.id]=1; draw()}}):el('span'));
+        var ok=bypass()||st.acc[m.id];
         var nav=el('div','btns'); nav.style.marginTop='16px';
         if(i>0){var p=el('a','btn ghost',tr('Назад','Back')); p.href='l.html?m='+ids[i-1]; nav.appendChild(p)}
-        if(i>=0&&i<ids.length-1){var n=el('a','btn',tr('Дальше','Next')); n.href='l.html?m='+ids[i+1]; nav.appendChild(n)}
+        if(i>=0&&i<ids.length-1){var n=el('a','btn',tr('Дальше','Next')); if(ok){n.href='l.html?m='+ids[i+1]} else {n.setAttribute('aria-disabled','true'); n.style.opacity='.5'; n.style.pointerEvents='none'; n.title=tr('Сначала сдайте практику','Submit the practice first')} nav.appendChild(n)}
         box.appendChild(nav);
       }
+      NG.onUser(function(u,role){st.u=u; st.role=role;
+        sb.from('submissions').select('module_id').eq('user_id',u.id).in('status',['accepted','ai_accepted']).then(function(r){(r.data||[]).forEach(function(x){st.acc[x.module_id]=1}); draw()})});
       draw(); again.push(draw);
     });
   });
