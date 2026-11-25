@@ -39,6 +39,34 @@
       });
     });
   }
+  function requests(){
+    var box=$('reqs'); box.textContent='';
+    sb.from('data_requests').select('id,kind,message,status,created_at,user:profiles(email,full_name)').order('created_at',{ascending:false}).then(function(r){
+      if(r.error){note(tr('Не удалось загрузить запросы.','Could not load requests.'),1);return}
+      if(!r.data.length){box.appendChild(el('p','muted',tr('Запросов нет.','No requests.')));return}
+      var RS={new:['Новый','New'],in_progress:['В работе','In progress'],done:['Готово','Done'],rejected:['Отклонён','Rejected']};
+      r.data.forEach(function(q){
+        var row=el('div','row'), g=el('div','grow'), u=q.user||{};
+        g.appendChild(el('b',null,(q.kind==='deletion'?tr('Удаление аккаунта','Account deletion'):tr('Вопрос','Question'))+' · '+(u.email||'—')));
+        if(q.message) g.appendChild(el('small',null,q.message)); g.appendChild(el('small',null,new Date(q.created_at).toLocaleString())); row.appendChild(g);
+        row.appendChild(sel(RS,q.status,function(s){sb.from('data_requests').update({status:s.value}).eq('id',q.id).then(function(x){note(x.error?tr('Не удалось сохранить.','Could not save.'):tr('Сохранено.','Saved.'),!!x.error)})}));
+        box.appendChild(row);
+      });
+    });
+  }
+  function consents(){
+    var box=$('cons'); box.textContent='';
+    sb.from('consent_log').select('status,consent_version,policy_version,given_at,withdrawn_at,user:profiles(email)').order('given_at',{ascending:false}).limit(50).then(function(r){
+      if(r.error){note(tr('Не удалось загрузить журнал.','Could not load the log.'),1);return}
+      if(!r.data.length){box.appendChild(el('p','muted',tr('Записей нет.','No records.')));return}
+      r.data.forEach(function(c){
+        var row=el('div','row'), g=el('div','grow');
+        g.appendChild(el('b',null,(c.user&&c.user.email)||'—'));
+        g.appendChild(el('small',null,(c.status==='given'?tr('Дано ','Given '):tr('Отозвано ','Withdrawn '))+new Date(c.status==='given'?c.given_at:c.withdrawn_at).toLocaleString()+' · '+c.consent_version+' / '+c.policy_version));
+        row.appendChild(g); box.appendChild(row);
+      });
+    });
+  }
   function users(me){
     var box=$('users'); box.textContent='';
     sb.from('profiles').select('id,email,full_name,role').order('created_at',{ascending:false}).then(function(r){
@@ -53,6 +81,6 @@
   }
   window.NG.onUser(function(u,role){
     if(role!=='admin'){location.replace('profile.html');return}
-    $('adm').hidden=false; apps(); courses(); users(u.id);
+    $('adm').hidden=false; apps(); courses(); requests(); consents(); users(u.id);
   });
 })();

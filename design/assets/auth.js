@@ -8,6 +8,11 @@
   sb.auth.getSession().then(function(r){ if(r.data.session && /login\.html$/.test(location.pathname)) location.replace(back) });
   document.addEventListener('click',function(e){
     var t=e.target.closest('[data-act]'); if(!t) return;
+    if(t.dataset.act==='google'||t.dataset.act==='magic'){
+      var cb=document.getElementById('cons');
+      if(cb&&!cb.checked){say('Отметьте согласие на обработку данных.','Tick the consent box first.',1);return}
+      try{localStorage.setItem('ng-consent-pending',CV)}catch(e){}
+    }
     if(t.dataset.act==='google'){
       sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back}}).then(function(r){ if(r.error) say('Не удалось начать вход. Попробуйте ещё раз.','Could not start sign-in. Try again.',1) });
     }
@@ -21,11 +26,41 @@
   });
 
   var ROLE={student:['Студент','Student'],instructor:['Преподаватель','Instructor'],admin:['Администратор','Admin']};
+
+  var CV=C.consentVersion||'v1';
+  function pending(){try{return localStorage.getItem('ng-consent-pending')===CV}catch(e){return false}}
+  function clearPending(){try{localStorage.removeItem('ng-consent-pending')}catch(e){}}
+  function record(u,done){sb.from('consent_log').insert({user_id:u.id,consent_version:CV,policy_version:CV,status:'given'}).then(function(){clearPending();if(done) done()})}
+  function overlay(u){
+    var o=document.createElement('div'); o.setAttribute('role','dialog'); o.setAttribute('aria-modal','true'); o.style.cssText='position:fixed;inset:0;z-index:99;display:grid;place-items:center;padding:16px;background:rgba(0,0,0,.6)';
+    var c=document.createElement('div'); c.className='glass pad'; c.style.cssText='max-width:480px;display:grid;gap:14px;background:var(--bg,#0b1220)';
+    var h=document.createElement('h2'); h.textContent=en()?'Consent to data processing':'Согласие на обработку данных'; h.style.margin='0';
+    var l=document.createElement('label'); l.style.cssText='display:flex;gap:10px;align-items:flex-start';
+    var k=document.createElement('input'); k.type='checkbox'; k.style.cssText='width:20px;min-height:20px;flex:none'; l.appendChild(k);
+    var sp=document.createElement('span'); sp.appendChild(document.createTextNode(en()?'I agree to the processing of my personal data in accordance with the NextGen ':'Я согласен на обработку моих персональных данных в соответствии с '));
+    var a=document.createElement('a'); a.href='privacy.html'; a.target='_blank'; a.rel='noopener'; a.textContent=en()?'Privacy Policy':'Политикой конфиденциальности NextGen'; a.style.textDecoration='underline'; sp.appendChild(a); l.appendChild(sp);
+    var m=document.createElement('p'); m.className='muted'; m.style.margin='0'; m.setAttribute('role','status');
+    var r=document.createElement('div'); r.className='btns';
+    var ok=document.createElement('button'); ok.className='btn'; ok.textContent=en()?'Accept and continue':'Принять и продолжить';
+    var no=document.createElement('button'); no.className='btn ghost'; no.textContent=en()?'Sign out':'Выйти';
+    ok.onclick=function(){ if(!k.checked){m.textContent=en()?'Tick the box to continue.':'Отметьте согласие, чтобы продолжить.';return} ok.disabled=true; record(u,function(){o.remove()}) };
+    no.onclick=function(){sb.auth.signOut().then(function(){location.href='index.html'})};
+    r.appendChild(ok); r.appendChild(no); [h,l,m,r].forEach(function(x){c.appendChild(x)}); o.appendChild(c); document.body.appendChild(o); k.focus();
+  }
+  function consentGate(u){
+    sb.from('consent_log').select('status,consent_version').eq('user_id',u.id).order('given_at',{ascending:false}).limit(1).then(function(r){
+      if(r.error) return;
+      var l=r.data&&r.data[0];
+      if(l&&l.status==='given'&&l.consent_version===CV) return;
+      if(pending()) record(u); else overlay(u);
+    });
+  }
   var cbs=[], me=null; window.NG={sb:sb,onUser:function(f){me?f(me.u,me.role):cbs.push(f)}};
   function face(box,url,txt){ if(!box) return; box.textContent=''; if(url){var i=new Image(); i.alt=''; i.referrerPolicy='no-referrer'; i.style.cssText='width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block'; i.onerror=function(){box.textContent=txt}; i.src=url; box.appendChild(i)} else box.textContent=txt }
   sb.auth.getSession().then(function(r){
     var ss=r.data.session, who=document.getElementById('who'), pn=document.getElementById('pn');
     if(!ss){ if(pn||document.querySelector('[data-auth]')) location.replace('login.html'); return }
+    consentGate(ss.user);
     var u=ss.user, md=u.user_metadata||{}, nm=md.full_name||md.name||(u.email||'').split('@')[0], ini=nm.charAt(0).toUpperCase();
     if(who){who.href='profile.html';who.querySelector('.wn').textContent=nm.split(' ')[0]}
     sb.from('profiles').select('role,avatar_url').eq('id',u.id).maybeSingle().then(function(x){
