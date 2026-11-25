@@ -93,3 +93,4 @@ textarea,input,select{width:100%;padding:12px 14px;border-radius:14px;border:1px
 .split>*,.main>*,.grid>*,.lesson>*{min-width:0}.split>section.glass{grid-template-columns:minmax(0,1fr)}
 .stepper .s{min-width:0;overflow-wrap:anywhere}
 .stepper{grid-template-columns:repeat(2,1fr)}@media(min-width:700px){.stepper{grid-template-columns:repeat(3,1fr)}}.stepper .s{overflow-wrap:normal}
+.menu-btn{display:none!important}.foot{padding-bottom:96px}@media(min-width:960px){.foot{padding-bottom:30px}}
