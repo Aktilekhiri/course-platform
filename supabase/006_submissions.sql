@@ -1,4 +1,6 @@
 -- 006: сдача практики, проверка ИИ, проверка преподавателем. Запустить один раз в SQL Editor.
+-- старая пустая таблица submissions из первой схемы заменяется новой
+drop table if exists public.submissions cascade;
 create table public.submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles(id) on delete cascade,
@@ -39,6 +41,8 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('submissions', 'submissions', false, 2097152, array['image/jpeg','image/png','image/webp'])
 on conflict (id) do nothing;
 
+drop policy if exists "subs files insert own" on storage.objects;
+drop policy if exists "subs files read" on storage.objects;
 create policy "subs files insert own" on storage.objects for insert to authenticated
   with check (bucket_id = 'submissions' and (storage.foldername(name))[1] = auth.uid()::text
     and name ~ '^[0-9a-f-]{36}/[0-9a-f-]{36}/[0-9]\.(jpg|png|webp)$');
