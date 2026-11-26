@@ -57,6 +57,7 @@
     r.appendChild(ok); r.appendChild(no); [h,l,m,r].forEach(function(x){c.appendChild(x)}); o.appendChild(c); document.body.appendChild(o); k.focus();
   }
   function consentGate(u){
+    if(/(privacy|terms|partner-terms)\.html$/.test(location.pathname)) return;
     sb.from('consent_log').select('status,consent_version').eq('user_id',u.id).order('given_at',{ascending:false}).limit(1).then(function(r){
       if(r.error) return;
       var l=r.data&&r.data[0];

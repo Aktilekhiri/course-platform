@@ -9,6 +9,7 @@
     var b=document.getElementById('lang'); if(b) b.textContent=lang==='ru'?'EN':'RU';
   }
   apply();
+  var cur=location.pathname.split('/').pop()||'index.html'; document.querySelectorAll('.links a,.mobile-menu a').forEach(function(a){if(a.getAttribute('href')===cur){a.classList.add('on');a.setAttribute('aria-current','page')}});
   document.addEventListener('click',function(e){
     var t=e.target.closest('[data-act]'); if(!t) return;
     if(t.dataset.act==='theme'){theme=theme==='dark'?'light':'dark';s('ng-theme',theme);apply()}
