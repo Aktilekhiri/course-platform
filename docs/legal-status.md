@@ -3,7 +3,7 @@
 Technical implementation is not legal confirmation. Open questions wait for the written answer of the State Agency for Personal Data Protection.
 
 ## A. Implemented
-- Privacy policy v2026-11-26-v1 (design/privacy.html), placeholders where facts are missing.
+- Privacy policy v2026-11-26-v2 (design/privacy.html), placeholders where facts are missing.
 - Consent: unchecked checkbox on login; if a signed-in user has no valid consent, a blocking dialog asks for it. Stored in `consent_log` (user, time, consent version, policy version, status, withdrawal date). Admin-only read.
 - Profile "My data": view/edit name, download data as JSON, withdraw consent (signs out), deletion request, question. Requests land in `data_requests`, handled in the admin panel.
 - Access: roles via RLS; teachers do not read student profiles; no passwords (Google / email link); public certificate lookup removed.

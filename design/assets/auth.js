@@ -8,13 +8,16 @@
   sb.auth.getSession().then(function(r){ if(r.data.session && /login\.html$/.test(location.pathname)) location.replace(back) });
   document.addEventListener('click',function(e){
     var t=e.target.closest('[data-act]'); if(!t) return;
-    if(t.dataset.act==='google'||t.dataset.act==='magic'){
+    if(t.dataset.act==='google'||t.dataset.act==='telegram'||t.dataset.act==='magic'){
       var cb=document.getElementById('cons');
       if(cb&&!cb.checked){say('Отметьте согласие на обработку данных.','Tick the consent box first.',1);return}
       try{localStorage.setItem('ng-consent-pending',CV)}catch(e){}
     }
     if(t.dataset.act==='google'){
       sb.auth.signInWithOAuth({provider:'google',options:{redirectTo:back}}).then(function(r){ if(r.error) say('Не удалось начать вход. Попробуйте ещё раз.','Could not start sign-in. Try again.',1) });
+    }
+    if(t.dataset.act==='telegram'){
+      sb.auth.signInWithOAuth({provider:'custom:telegram',options:{redirectTo:back}}).then(function(r){ if(r.error) say('Вход через Telegram пока не доступен. Попробуйте Google.','Telegram sign-in is not available yet. Try Google.',1) });
     }
     if(t.dataset.act==='magic'){
       var em=document.getElementById('em'); if(!em||!em.value||!em.checkValidity()){say('Введите e-mail.','Enter your email.',1);return}

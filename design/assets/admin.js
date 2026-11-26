@@ -69,10 +69,10 @@
   }
   function users(me){
     var box=$('users'); box.textContent='';
-    sb.from('profiles').select('id,email,full_name,role').order('created_at',{ascending:false}).then(function(r){
+    sb.from('profiles').select('id,email,full_name,role,tg_username').order('created_at',{ascending:false}).then(function(r){
       if(r.error){note(tr('Не удалось загрузить пользователей.','Could not load users.'),1);return}
       r.data.forEach(function(u){
-        var c=el('div','row'); var g=el('div','grow'); g.appendChild(el('b',null,u.full_name||u.email||'—')); g.appendChild(el('small',null,u.email||'')); c.appendChild(g);
+        var c=el('div','row'); var g=el('div','grow'); g.appendChild(el('b',null,u.full_name||u.email||'—')); g.appendChild(el('small',null,u.email||(u.tg_username?'Telegram @'+u.tg_username:''))); c.appendChild(g);
         if(u.id===me) c.appendChild(el('span','badge b-info',RL[u.role][en()?1:0]));
         else c.appendChild(sel(RL,u.role,function(s){sb.rpc('set_role',{p_user:u.id,p_role:s.value}).then(function(x){note(x.error?tr('Не удалось сменить роль.','Could not change the role.'):tr('Роль изменена.','Role changed.'),!!x.error)})}));
         box.appendChild(c);
