@@ -53,11 +53,13 @@
       var cf=$('cf'); cf.textContent='';
       [['title_ru',tr('Название (RU)','Title (RU)'),120],['title_en',tr('Название (EN)','Title (EN)'),120]].forEach(function(k){cf.appendChild(field(k[1],k[0],c[k[0]],'text',k[2]))});
       [['description_ru',tr('Описание (RU)','Description (RU)')],['description_en',tr('Описание (EN)','Description (EN)')]].forEach(function(k){cf.appendChild(field(k[1],k[0],c[k[0]],'area',2000))});
+      if('syllabus_ru' in c){[['syllabus_ru',tr('Syllabus (RU)','Syllabus (RU)')],['syllabus_en','Syllabus (EN)']].forEach(function(k){cf.appendChild(field(k[1],k[0],c[k[0]],'area',20000))});
+        cf.appendChild(el('small','muted',tr('Формат: «## Заголовок», «### Подзаголовок», «- пункт», «1. пункт», таблица строками «| а | б |» (вторая строка «|---|---|»). Остальное обычный текст.','Format: "## Heading", "### Subheading", "- item", "1. item", a table as "| a | b |" rows (second row "|---|---|"). The rest is plain text.')))}
       cf.appendChild(choice(tr('Категория','Category'),'category',CATS,c.category)); cf.appendChild(choice(tr('Язык курса','Course language'),'language',LANGS,c.language));
       var sv=el('button','btn',tr('Сохранить курс','Save course')); sv.type='submit'; cf.appendChild(sv);
       Array.prototype.forEach.call(cf.elements,function(e){e.disabled=locked});
       cf.onsubmit=function(e){e.preventDefault(); var v=vals(cf);
-        sb.from('courses').update({title_ru:v.title_ru||null,title_en:v.title_en||null,description_ru:v.description_ru||null,description_en:v.description_en||null,category:v.category,language:v.language}).eq('id',id).then(function(x){note(x.error?tr('Не удалось сохранить.','Could not save.'):tr('Сохранено.','Saved.'),!!x.error)})};
+        sb.from('courses').update(Object.assign({title_ru:v.title_ru||null,title_en:v.title_en||null,description_ru:v.description_ru||null,description_en:v.description_en||null,category:v.category,language:v.language},('syllabus_ru' in c)?{syllabus_ru:v.syllabus_ru||null,syllabus_en:v.syllabus_en||null}:{})).eq('id',id).then(function(x){note(x.error?tr('Не удалось сохранить.','Could not save.'):tr('Сохранено.','Saved.'),!!x.error)})};
       // status actions
       var sa=$('sa'); sa.textContent=''; var s=ST[c.status]; sa.appendChild(el('span','badge '+s[2],s[en()?1:0]));
       function act(label,to,primary){var b=el('button','btn sm'+(primary?'':' ghost'),label); b.addEventListener('click',function(){sb.from('courses').update({status:to}).eq('id',id).then(function(x){if(x.error) note(tr('Не удалось сменить статус.','Could not change the status.'),1); else location.reload()})}); sa.appendChild(b)}

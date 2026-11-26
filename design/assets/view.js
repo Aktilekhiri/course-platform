@@ -7,6 +7,18 @@
   var pick=function(r,k){var a=r[k+'_ru'],b=r[k+'_en']; return en()?(b||a||''):(a||b||'')};
   var yt=function(u){var m=/(?:youtu\.be\/|[?&]v=|embed\/|shorts\/)([A-Za-z0-9_-]{11})/.exec(u||''); return m&&m[1]};
   function paras(box,text){box.textContent=''; (text||'').split(/\n{2,}/).forEach(function(p){if(p.trim()){var e=el('p',null,p.trim()); e.style.whiteSpace='pre-line'; box.appendChild(e)}})}
+  // Syllabus text: "## title", "### subtitle", "- item" / "1. item" (indent for nested), "| a | b |" table rows. Plain text only.
+  function syl(box,text){box.textContent=''; var tb=null;
+    (text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,''), m;
+      if(!l.trim()){tb=null;return}
+      if(m=/^###\s+(.*)/.exec(l)){tb=null; var b=el('p',null,m[1]); b.style.cssText='font-weight:700;margin:14px 0 4px'; box.appendChild(b);return}
+      if(m=/^##\s+(.*)/.exec(l)){tb=null; var h=el('h3',null,m[1]); h.style.margin='24px 0 8px'; box.appendChild(h);return}
+      if(l.charAt(0)==='|'){var cs=l.replace(/^\||\|$/g,'').split('|').map(function(x){return x.trim()}); if(cs.every(function(x){return /^:?-+:?$/.test(x)})) return;
+        if(!tb){var w=el('div'); w.style.cssText='overflow-x:auto;margin:8px 0'; tb=el('table'); tb.style.cssText='border-collapse:collapse;width:100%;min-width:380px'; w.appendChild(tb); box.appendChild(w)}
+        var tr_=el('tr'), th=!tb.rows.length; cs.forEach(function(x){var c=el(th?'th':'td',null,x); c.style.cssText='border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top'; tr_.appendChild(c)}); tb.appendChild(tr_); return}
+      tb=null;
+      if(m=/^(\s*)([-*]|\d+\.)\s+(.*)/.exec(l)){var r=el('div'); r.style.cssText='display:flex;gap:8px;margin:4px 0 4px '+(Math.floor(m[1].length/2)*20)+'px'; var mk=el('span',null,m[2].length>1?m[2]:'•'); mk.style.flex='none'; r.appendChild(mk); r.appendChild(el('span',null,m[3])); box.appendChild(r); return}
+      box.appendChild(el('p',null,l.trim()))})}
   var again=[]; document.addEventListener('click',function(e){if(e.target.closest('[data-act=lang]')) setTimeout(function(){again.forEach(function(f){f()})},0)});
   function fail(box,ru,e){box.textContent=''; box.appendChild(el('p','muted',tr(ru,e)))}
 
@@ -18,7 +30,8 @@
     draw(); again.push(draw);
   });
 
-  if($('cv')) sb.from('courses').select('id,title_ru,title_en,description_ru,description_en,modules(id,position,title_ru,title_en)').eq('slug',q.get('c')||'').eq('status','published').maybeSingle().then(function(r){
+  if($('cv')) (function(){var base='id,title_ru,title_en,description_ru,description_en,modules(id,position,title_ru,title_en)', get=function(cols){return sb.from('courses').select(cols).eq('slug',q.get('c')||'').eq('status','published').maybeSingle()};
+    return get(base+',syllabus_ru,syllabus_en').then(function(r){return r.error?get(base):r})})().then(function(r){
     var c=r.data, box=$('cv'); if(!c){fail(box,'Курс не найден.','Course not found.');return}
     var ms=(c.modules||[]).sort(function(a,b){return a.position-b.position});
     function draw(){box.textContent='';
@@ -29,6 +42,10 @@
       if(ms.length){var b=el('a','btn',tr('Начать','Start')); b.href='l.html?m='+ms[0].id; b.style.marginTop='16px'; b.addEventListener('click',function(){
         NG.onUser(function(u){sb.from('enrollments').upsert({user_id:u.id,course_id:c.id},{ignoreDuplicates:true})}) }); box.appendChild(b)}
       else box.appendChild(el('p','muted',tr('Модули скоро появятся.','Modules are coming soon.')));
+      var d=el('details','glass pad'); d.id='syllabus'; d.style.marginTop='20px'; var sm=el('summary',null,'Syllabus'); sm.style.cssText='cursor:pointer;font:700 18px "Unbounded","Onest",sans-serif'; d.appendChild(sm);
+      var sb2=el('div'); d.appendChild(sb2); var sy=pick(c,'syllabus');
+      if(sy) syl(sb2,sy); else sb2.appendChild(el('p','muted',tr('Преподаватель пока не добавил Syllabus.','The instructor has not added a Syllabus yet.')));
+      box.appendChild(d); if(location.hash==='#syllabus'){d.open=true; setTimeout(function(){d.scrollIntoView()},0)}
     }
     draw(); again.push(draw);
   });
