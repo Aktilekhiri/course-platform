@@ -119,3 +119,4 @@ a.glass.pad.hov{padding:16px}
 a.glass.pad.hov h3{font-size:18px;margin-bottom:4px}
 }
 @media(max-width:600px){.hero .art{min-height:clamp(240px,66vw,300px);margin-top:0}.hero .art .prompt{bottom:10px}}
+@media(max-width:600px){.hero .art{min-height:clamp(300px,82vw,360px)}.art .girl{left:auto;right:-4%;transform:none}}
