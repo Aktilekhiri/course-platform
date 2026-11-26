@@ -37,15 +37,15 @@
     function draw(){box.textContent='';
       box.appendChild(el('h1',null,pick(c,'title'))).style.cssText='font-size:clamp(24px,4vw,36px);margin:0';
       box.appendChild(el('p','muted',pick(c,'description')));
+      var d=el('details','glass pad'); d.id='syllabus'; d.style.margin='16px 0'; var sm=el('summary',null,'Syllabus'); sm.style.cssText='cursor:pointer;font:700 18px "Unbounded","Onest",sans-serif'; d.appendChild(sm);
+      var sb2=el('div'); d.appendChild(sb2); var sy=pick(c,'syllabus');
+      if(sy) syl(sb2,sy); else sb2.appendChild(el('p','muted',tr('Преподаватель пока не добавил Syllabus.','The instructor has not added a Syllabus yet.')));
+      box.appendChild(d); if(location.hash==='#syllabus'){d.open=true; setTimeout(function(){d.scrollIntoView()},0)}
       var l=el('div','list'); ms.forEach(function(m,i){var a=el('a','row'); a.href='l.html?m='+m.id; a.style.textDecoration='none'; var g=el('div','grow'); g.appendChild(el('b',null,(i+1)+'. '+pick(m,'title'))); a.appendChild(g); l.appendChild(a)});
       box.appendChild(l);
       if(ms.length){var b=el('a','btn',tr('Начать','Start')); b.href='l.html?m='+ms[0].id; b.style.marginTop='16px'; b.addEventListener('click',function(){
         NG.onUser(function(u){sb.from('enrollments').upsert({user_id:u.id,course_id:c.id},{ignoreDuplicates:true})}) }); box.appendChild(b)}
       else box.appendChild(el('p','muted',tr('Модули скоро появятся.','Modules are coming soon.')));
-      var d=el('details','glass pad'); d.id='syllabus'; d.style.marginTop='20px'; var sm=el('summary',null,'Syllabus'); sm.style.cssText='cursor:pointer;font:700 18px "Unbounded","Onest",sans-serif'; d.appendChild(sm);
-      var sb2=el('div'); d.appendChild(sb2); var sy=pick(c,'syllabus');
-      if(sy) syl(sb2,sy); else sb2.appendChild(el('p','muted',tr('Преподаватель пока не добавил Syllabus.','The instructor has not added a Syllabus yet.')));
-      box.appendChild(d); if(location.hash==='#syllabus'){d.open=true; setTimeout(function(){d.scrollIntoView()},0)}
     }
     draw(); again.push(draw);
   });
