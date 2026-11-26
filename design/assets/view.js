@@ -10,7 +10,7 @@
   // Syllabus text: "## title", "### subtitle", "- item" / "1. item" (indent for nested), "| a | b |" table rows. Plain text only.
   function lk(p,str){String(str).split(/(https?:\/\/[^\s)]+)/).forEach(function(x,i){if(i%2){var a=document.createElement('a');a.href=x;a.target='_blank';a.rel='noopener noreferrer';a.textContent=x.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');a.style.color='var(--accent,#2a6bff)';p.appendChild(a)}else if(x)p.appendChild(document.createTextNode(x))});return p}
   function syl(box,text){box.textContent=''; box.style.cssText='font-size:15px;line-height:1.55;overflow-wrap:break-word;min-width:0'; var tb=null;
-    (text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,''), m;
+    (text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,''), m; if(/^\s*\|/.test(l)||/^\s*#{2,3}\s/.test(l)) l=l.replace(/^\s+/,'');
       if(!l.trim()){tb=null;return}
       if(m=/^###\s+(.*)/.exec(l)){tb=null; var b=el('p',null,m[1]); b.style.cssText='font-weight:700;margin:14px 0 4px'; box.appendChild(b);return}
       if(m=/^##\s+(.*)/.exec(l)){tb=null; var h=el('h3',null,m[1]); h.style.margin='24px 0 8px'; box.appendChild(h);return}
@@ -40,7 +40,7 @@
       box.appendChild(el('p','muted',pick(c,'description')));
       var d=el('details','glass pad'); d.id='syllabus'; d.style.margin='16px 0'; var sm=el('summary',null,'Syllabus'); sm.style.cssText='cursor:pointer;font:700 18px "Unbounded","Onest",sans-serif'; d.appendChild(sm);
       var sb2=el('div'); d.appendChild(sb2); var sy=pick(c,'syllabus');
-      if(sy) syl(sb2,sy); else sb2.appendChild(el('p','muted',tr('Преподаватель пока не добавил Syllabus.','The instructor has not added a Syllabus yet.')));
+      if(c.slug==='website-with-ai'||(q.get('c')==='website-with-ai')){var pr=el('p',null,tr('Полный Syllabus курса в PDF: цели, содержание, оценивание, политика курса.','The full course Syllabus as a PDF: goals, content, grading, course policy.')); sb2.appendChild(pr); var pa=el('a','btn',tr('Открыть Syllabus (PDF)','Open Syllabus (PDF)')); pa.href='assets/Syllabus-Website-with-AI-'+(en()?'EN':'RU')+'.pdf'; pa.target='_blank'; pa.rel='noopener'; sb2.appendChild(pa); d.open=true} else if(sy) syl(sb2,sy); else sb2.appendChild(el('p','muted',tr('Преподаватель пока не добавил Syllabus.','The instructor has not added a Syllabus yet.')));
       box.appendChild(d); if(location.hash==='#syllabus'){d.open=true; setTimeout(function(){d.scrollIntoView()},0)}
       var l=el('div','list'); ms.forEach(function(m,i){var a=el('a','row'); a.href='l.html?m='+m.id; a.style.textDecoration='none'; var g=el('div','grow'); g.appendChild(el('b',null,(i+1)+'. '+pick(m,'title'))); a.appendChild(g); l.appendChild(a)});
       box.appendChild(l);
