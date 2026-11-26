@@ -9,7 +9,7 @@
   function paras(box,text){box.textContent=''; (text||'').split(/\n{2,}/).forEach(function(p){if(p.trim()){var e=el('p',null,p.trim()); e.style.whiteSpace='pre-line'; box.appendChild(e)}})}
   // Syllabus text: "## title", "### subtitle", "- item" / "1. item" (indent for nested), "| a | b |" table rows. Plain text only.
   function lk(p,str){String(str).split(/(https?:\/\/[^\s)]+)/).forEach(function(x,i){if(i%2){var a=document.createElement('a');a.href=x;a.target='_blank';a.rel='noopener noreferrer';a.textContent=x.replace(/^https?:\/\/(www\.)?/,'').replace(/\/$/,'');a.style.color='var(--accent,#2a6bff)';p.appendChild(a)}else if(x)p.appendChild(document.createTextNode(x))});return p}
-  function syl(box,text){box.textContent=''; box.style.cssText='font-size:15px;line-height:1.55;overflow-wrap:anywhere;min-width:0'; var tb=null;
+  function syl(box,text){box.textContent=''; box.style.cssText='font-size:15px;line-height:1.55;overflow-wrap:break-word;min-width:0'; var tb=null;
     (text||'').split('\n').forEach(function(raw){var l=raw.replace(/\s+$/,''), m;
       if(!l.trim()){tb=null;return}
       if(m=/^###\s+(.*)/.exec(l)){tb=null; var b=el('p',null,m[1]); b.style.cssText='font-weight:700;margin:14px 0 4px'; box.appendChild(b);return}
@@ -18,7 +18,7 @@
         if(!tb){var w=el('div'); w.style.cssText='overflow-x:auto;margin:8px 0'; tb=el('table'); tb.style.cssText='border-collapse:collapse;width:100%;min-width:380px'; w.appendChild(tb); box.appendChild(w)}
         var tr_=el('tr'), th=!tb.rows.length; cs.forEach(function(x){var c=el(th?'th':'td',null,x); c.style.cssText='border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top'; tr_.appendChild(c)}); tb.appendChild(tr_); return}
       tb=null;
-      if(m=/^(\s*)([-*]|\d+\.)\s+(.*)/.exec(l)){var r=el('div'); r.style.cssText='display:flex;gap:8px;margin:4px 0 4px '+(Math.floor(m[1].length/2)*20)+'px'; var mk=el('span',null,m[2].length>1?m[2]:'•'); mk.style.cssText='flex:none;min-width:1.4em'; r.appendChild(mk); var sp=el('span'); sp.style.minWidth='0'; r.appendChild(lk(sp,m[3])); box.appendChild(r); return}
+      if(m=/^(\s*)([-*]|\d+\.)\s+(.*)/.exec(l)){var ind=Math.min(Math.floor(m[1].length/2),3)*18, r=el('div'); r.style.cssText='position:relative;display:block;margin:4px 0;padding-left:'+(ind+26)+'px'; var mk=el('span',null,m[2].length>1?m[2]:'•'); mk.style.cssText='position:absolute;left:'+ind+'px;top:0'; r.appendChild(mk); lk(r,m[3]); box.appendChild(r); return}
       box.appendChild(lk(el('p'),l.trim()))})}
   var again=[]; document.addEventListener('click',function(e){if(e.target.closest('[data-act=lang]')) setTimeout(function(){again.forEach(function(f){f()})},0)});
   function fail(box,ru,e){box.textContent=''; box.appendChild(el('p','muted',tr(ru,e)))}
