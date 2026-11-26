@@ -10,7 +10,8 @@
     sb.from('consent_log').select('status,consent_version,given_at,withdrawn_at').eq('user_id',u.id).order('given_at',{ascending:false}).limit(1).then(function(r){
       var l=r.data&&r.data[0]; $('mdcons').textContent=!l?tr('Согласие не найдено','No consent on record'):
         (l.status==='given'?tr('Дано ','Given ')+new Date(l.given_at).toLocaleString():tr('Отозвано ','Withdrawn ')+new Date(l.withdrawn_at).toLocaleString())+' · '+l.consent_version});
-    $('mdsave').onclick=function(){var v=$('mdname').value.trim().slice(0,100);
+    $('mdsave').onclick=function(){var v=$('mdname').value.trim().slice(0,30);
+      if(!v||/@/.test(v)){say(tr('Ник не должен быть пустым или содержать @.','The nickname must not be empty or contain @.'),1);return}
       sb.from('profiles').update({full_name:v||null}).eq('id',u.id).then(function(x){ if(x.error) say(tr('Не удалось сохранить.','Could not save.'),1); else {say(tr('Сохранено.','Saved.')); if($('pn')&&v) $('pn').textContent=v}})};
     $('mddl').onclick=function(){
       var q=function(t,col){return sb.from(t).select('*').eq(col,u.id).then(function(r){return r.data||[]})};
