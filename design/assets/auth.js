@@ -73,7 +73,7 @@
     var u=ss.user, md=u.user_metadata||{}, nm='user', ini='U';
     if(who){who.href='profile.html'}
     sb.from('profiles').select('role,avatar_url,full_name').eq('id',u.id).maybeSingle().then(function(x){
-      nm=(x.data&&x.data.full_name)||'user'; ini=nm.charAt(0).toUpperCase(); if(who) who.querySelector('.wn').textContent=nm.split(' ')[0];
+      nm=(x.data&&x.data.full_name)||'user'; ini=nm.charAt(0).toUpperCase(); if(who) who.querySelector('.wn').textContent=nm.split(' ')[0]; document.querySelectorAll('.signin').forEach(function(l){l.textContent=nm.split(' ')[0];l.href='profile.html'});
       var role=(x.data&&x.data.role)||'student', av=(x.data&&x.data.avatar_url)||md.avatar_url||md.picture||null, t=ROLE[role];
       document.querySelectorAll('.adm').forEach(function(a){a.hidden=role!=='admin'}); document.querySelectorAll('.ins').forEach(function(a){a.hidden=!(role==='admin'||role==='instructor')});
       if(who&&av){var ic=who.querySelector('svg'); if(ic){var s=document.createElement('span'); s.style.cssText='width:22px;height:22px;border-radius:50%;overflow:hidden;display:inline-block;flex:none'; ic.replaceWith(s); face(s,av,'')}}
