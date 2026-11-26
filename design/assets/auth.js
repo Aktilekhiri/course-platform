@@ -5,7 +5,13 @@
   var en=function(){return document.documentElement.lang==='en'};
   var say=function(ru,e,bad){var s=document.getElementById('st'); if(!s) return; s.textContent=en()?e:ru; s.style.color=bad?'var(--bad,#ff8a8a)':'inherit'};
   var back=location.href.replace(/[^\/]*$/,'')+'dashboard.html';
-  sb.auth.getSession().then(function(r){ if(r.data.session && /login\.html$/.test(location.pathname)) location.replace(back) });
+  // Sign-in errors come back in the URL (query or hash). Show them on the login page so they are not lost.
+  var q=new URLSearchParams(location.search.slice(1)+'&'+location.hash.slice(1));
+  var perr=q.get('error_description')||q.get('error');
+  var onLogin=/login\.html$/.test(location.pathname);
+  if(perr&&!onLogin){ location.replace(location.href.replace(/[^\/]*$/,'')+'login.html?err='+encodeURIComponent(perr)); return }
+  if(onLogin){ var e0=perr||new URLSearchParams(location.search).get('err'); if(e0) say('Не удалось войти: '+e0,'Sign-in failed: '+e0,1) }
+  sb.auth.getSession().then(function(r){ if(r.data.session && onLogin) location.replace(back) });
   document.addEventListener('click',function(e){
     var t=e.target.closest('[data-act]'); if(!t) return;
     if(t.dataset.act==='google'||t.dataset.act==='telegram'||t.dataset.act==='magic'){
